@@ -43,13 +43,13 @@ export function Dashboard({ bills, selectedMonth, onMonthChange }: DashboardProp
       label: 'Total do Mês',
       value: formatCurrency(summary.total),
       icon: DollarSign,
-      color: 'bg-blue-50 text-blue-700 border-l-blue-500',
+      color: 'bg-[#3BA36C]/10 text-[#2d7a50] border-l-[#3BA36C]',
     },
     {
       label: 'Pendente',
       value: formatCurrency(summary.pending),
       icon: TrendingUp,
-      color: 'bg-amber-50 text-amber-700 border-l-amber-500',
+      color: 'bg-[#F79030]/10 text-[#c06a1a] border-l-[#F79030]',
     },
     {
       label: 'Pago',
@@ -86,7 +86,7 @@ export function Dashboard({ bills, selectedMonth, onMonthChange }: DashboardProp
           {!isCurrentMonth && (
             <button
               onClick={() => onMonthChange(getCurrentMonth())}
-              className="text-xs text-blue-600 hover:underline"
+              className="text-xs text-[#3BA36C] hover:underline"
             >
               Voltar ao mês atual
             </button>

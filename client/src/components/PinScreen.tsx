@@ -87,17 +87,22 @@ export function PinScreen() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <Card className="w-full max-w-sm">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#3BA36C] via-[#2d8a56] to-[#1f6e40] px-4">
+      <Card className="w-full max-w-sm border-0 shadow-2xl">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+          <img
+            src="/Logo.webp"
+            alt="Organiza Grana"
+            className="mx-auto mb-3 h-20 w-auto drop-shadow-md"
+          />
+          <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-[#3BA36C]/10">
             {isSetup ? (
-              <ShieldCheck className="h-8 w-8 text-blue-600" />
+              <ShieldCheck className="h-7 w-7 text-[#3BA36C]" />
             ) : (
-              <Lock className="h-8 w-8 text-blue-600" />
+              <Lock className="h-7 w-7 text-[#3BA36C]" />
             )}
           </div>
-          <CardTitle className="text-xl">
+          <CardTitle className="text-xl text-gray-900">
             {isSetup
               ? step === 'enter'
                 ? 'Crie seu PIN'

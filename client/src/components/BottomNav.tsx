@@ -21,11 +21,11 @@ export function BottomNav() {
               href={tab.path}
               className={`flex flex-1 flex-col items-center gap-1 py-2 text-xs font-medium transition-colors ${
                 isActive
-                  ? 'text-blue-600'
+                  ? 'text-[#3BA36C]'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <Icon className={`h-5 w-5 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
+              <Icon className={`h-5 w-5 ${isActive ? 'text-[#3BA36C]' : 'text-gray-400'}`} />
               {tab.label}
             </Link>
           );

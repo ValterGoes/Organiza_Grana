@@ -105,7 +105,7 @@ export default function Home() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 mx-auto"></div>
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-[#3BA36C] mx-auto"></div>
           <p className="text-gray-600">Carregando faturas...</p>
         </div>
       </div>
@@ -121,18 +121,21 @@ export default function Home() {
       <AlertNotification bills={bills} />
 
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 sm:py-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gerenciador de Vencimentos</h1>
-              <p className="mt-1 text-xs sm:text-sm text-gray-600">
-                Acompanhe suas faturas, boletos e cobranças
-              </p>
+      <header className="border-b border-gray-200 bg-gradient-to-r from-[#3BA36C] to-[#2d8a56] shadow-sm">
+        <div className="container mx-auto px-4 py-3 sm:py-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <img src="/Logo.webp" alt="Organiza Grana" className="h-10 sm:h-12 w-auto" />
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-white">Faturas a Vencer</h1>
+                <p className="text-xs sm:text-sm text-white/75">
+                  Acompanhe suas faturas, boletos e cobranças
+                </p>
+              </div>
             </div>
             <Button
               onClick={handleOpenNewBill}
-              className="gap-2 w-full sm:w-auto"
+              className="gap-2 w-full sm:w-auto bg-[#F79030] hover:bg-[#e07d20] text-white border-0"
             >
               <Plus className="h-5 w-5" />
               <span>Nova Fatura</span>

@@ -49,7 +49,7 @@ export default function Expenses() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 mx-auto" />
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-[#3BA36C] mx-auto" />
           <p className="text-gray-600">Carregando gastos...</p>
         </div>
       </div>
@@ -61,34 +61,39 @@ export default function Expenses() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 sm:py-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gastos Diários</h1>
-          <p className="mt-1 text-xs sm:text-sm text-gray-600">
-            Registre seus gastos do dia a dia
-          </p>
+      <header className="border-b border-gray-200 bg-gradient-to-r from-[#3BA36C] to-[#2d8a56] shadow-sm">
+        <div className="container mx-auto px-4 py-3 sm:py-4">
+          <div className="flex items-center gap-3">
+            <img src="/Logo.webp" alt="Organiza Grana" className="h-10 sm:h-12 w-auto" />
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-white">Gastos Diários</h1>
+              <p className="text-xs sm:text-sm text-white/75">
+                Registre seus gastos do dia a dia
+              </p>
+            </div>
+          </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-6 sm:py-8 space-y-6">
         {/* Stats Cards */}
         <section className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
-          <div className="flex flex-col gap-2 rounded-lg border-l-4 border-l-blue-500 bg-blue-50 p-3 sm:p-4">
+          <div className="flex flex-col gap-2 rounded-lg border-l-4 border-l-[#3BA36C] bg-[#3BA36C]/10 p-3 sm:p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs sm:text-sm font-medium text-blue-700 opacity-75">Hoje</span>
-              <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 text-blue-700" />
+              <span className="text-xs sm:text-sm font-medium text-[#2d7a50] opacity-75">Hoje</span>
+              <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 text-[#2d7a50]" />
             </div>
-            <p className="text-lg sm:text-2xl font-bold text-blue-700 break-words">{formatCurrency(todayTotal)}</p>
-            <p className="text-xs text-blue-600">{todayExpenses.length} gasto{todayExpenses.length !== 1 ? 's' : ''}</p>
+            <p className="text-lg sm:text-2xl font-bold text-[#2d7a50] break-words">{formatCurrency(todayTotal)}</p>
+            <p className="text-xs text-[#3BA36C]">{todayExpenses.length} gasto{todayExpenses.length !== 1 ? 's' : ''}</p>
           </div>
 
-          <div className="flex flex-col gap-2 rounded-lg border-l-4 border-l-amber-500 bg-amber-50 p-3 sm:p-4">
+          <div className="flex flex-col gap-2 rounded-lg border-l-4 border-l-[#F79030] bg-[#F79030]/10 p-3 sm:p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs sm:text-sm font-medium text-amber-700 opacity-75">Ontem</span>
-              <CalendarDays className="h-4 w-4 sm:h-5 sm:w-5 text-amber-700" />
+              <span className="text-xs sm:text-sm font-medium text-[#c06a1a] opacity-75">Ontem</span>
+              <CalendarDays className="h-4 w-4 sm:h-5 sm:w-5 text-[#c06a1a]" />
             </div>
-            <p className="text-lg sm:text-2xl font-bold text-amber-700 break-words">{formatCurrency(yesterdayTotal)}</p>
-            <p className="text-xs text-amber-600">{yesterdayExpenses.length} gasto{yesterdayExpenses.length !== 1 ? 's' : ''}</p>
+            <p className="text-lg sm:text-2xl font-bold text-[#c06a1a] break-words">{formatCurrency(yesterdayTotal)}</p>
+            <p className="text-xs text-[#F79030]">{yesterdayExpenses.length} gasto{yesterdayExpenses.length !== 1 ? 's' : ''}</p>
           </div>
 
           <div className="flex flex-col gap-2 rounded-lg border-l-4 border-l-green-500 bg-green-50 p-3 sm:p-4">
