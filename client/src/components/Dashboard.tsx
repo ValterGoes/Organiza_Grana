@@ -1,13 +1,35 @@
 import { Bill } from '@/hooks/useBills';
 import { calculateSummary, formatCurrency } from '@/lib/billUtils';
-import { AlertCircle, CheckCircle2, DollarSign, TrendingUp } from 'lucide-react';
+import { AlertCircle, CheckCircle2, DollarSign, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface DashboardProps {
   bills: Bill[];
+  selectedMonth: string; // YYYY-MM
+  onMonthChange: (month: string) => void;
 }
 
-export function Dashboard({ bills }: DashboardProps) {
+function formatMonthLabel(yearMonth: string): string {
+  const [year, month] = yearMonth.split('-').map(Number);
+  const date = new Date(year, month - 1);
+  return new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(date);
+}
+
+function shiftMonth(yearMonth: string, offset: number): string {
+  const [year, month] = yearMonth.split('-').map(Number);
+  const date = new Date(year, month - 1 + offset);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function getCurrentMonth(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+export function Dashboard({ bills, selectedMonth, onMonthChange }: DashboardProps) {
   const summary = calculateSummary(bills);
+  const isCurrentMonth = selectedMonth === getCurrentMonth();
+
   const overdueBills = bills.filter((bill) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -18,7 +40,7 @@ export function Dashboard({ bills }: DashboardProps) {
 
   const stats = [
     {
-      label: 'Total',
+      label: 'Total do Mês',
       value: formatCurrency(summary.total),
       icon: DollarSign,
       color: 'bg-blue-50 text-blue-700 border-l-blue-500',
@@ -45,7 +67,45 @@ export function Dashboard({ bills }: DashboardProps) {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Month Selector */}
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onMonthChange(shiftMonth(selectedMonth, -1))}
+          className="gap-1"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <span className="hidden sm:inline">Anterior</span>
+        </Button>
+
+        <div className="text-center">
+          <h2 className="text-sm sm:text-base font-semibold text-gray-900 capitalize">
+            {formatMonthLabel(selectedMonth)}
+          </h2>
+          {!isCurrentMonth && (
+            <button
+              onClick={() => onMonthChange(getCurrentMonth())}
+              className="text-xs text-blue-600 hover:underline"
+            >
+              Voltar ao mês atual
+            </button>
+          )}
+        </div>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onMonthChange(shiftMonth(selectedMonth, 1))}
+          className="gap-1"
+        >
+          <span className="hidden sm:inline">Próximo</span>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -63,6 +123,7 @@ export function Dashboard({ bills }: DashboardProps) {
         })}
       </div>
 
+      {/* Overdue Alert */}
       {overdueBills.length > 0 && (
         <div className="rounded-lg border-l-4 border-l-red-500 bg-red-50 p-3 sm:p-4">
           <div className="flex items-start gap-3">

@@ -140,28 +140,20 @@ export function filterBillsByStatus(
   });
 }
 
+export function filterBillsByMonth(bills: Bill[], yearMonth: string): Bill[] {
+  return bills.filter((bill) => bill.dueDate.startsWith(yearMonth));
+}
+
 export function calculateSummary(bills: Bill[]) {
-  // Para faturas recorrentes, o total considera todas as parcelas
-  const total = bills.reduce((sum, bill) => {
-    const multiplier = bill.recurrence ? bill.recurrence.totalInstallments : 1;
-    return sum + bill.amount * multiplier;
-  }, 0);
+  const total = bills.reduce((sum, bill) => sum + bill.amount, 0);
 
   const pending = bills
     .filter((bill) => !bill.paid)
-    .reduce((sum, bill) => {
-      const remaining = bill.recurrence
-        ? bill.recurrence.totalInstallments - bill.recurrence.paidInstallments
-        : 1;
-      return sum + bill.amount * remaining;
-    }, 0);
+    .reduce((sum, bill) => sum + bill.amount, 0);
 
-  const paid = bills.reduce((sum, bill) => {
-    if (bill.recurrence) {
-      return sum + bill.amount * bill.recurrence.paidInstallments;
-    }
-    return bill.paid ? sum + bill.amount : sum;
-  }, 0);
+  const paid = bills
+    .filter((bill) => bill.paid)
+    .reduce((sum, bill) => sum + bill.amount, 0);
 
   const overdue = bills
     .filter((bill) => {

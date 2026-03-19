@@ -8,7 +8,7 @@ import { NotificationPrompt } from '@/components/NotificationPrompt';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { sortBillsByUrgency, filterBillsByStatus } from '@/lib/billUtils';
+import { sortBillsByUrgency, filterBillsByStatus, filterBillsByMonth } from '@/lib/billUtils';
 import { checkAndNotifyDueBills } from '@/lib/notifications';
 import { Plus, Search } from 'lucide-react';
 import { toast } from 'sonner';
@@ -27,6 +27,10 @@ export default function Home() {
   const [editingBill, setEditingBill] = useState<Bill | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'paid' | 'overdue'>('all');
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  });
 
   // Checar notificações de vencimento ao abrir o app
   useEffect(() => {
@@ -35,9 +39,14 @@ export default function Home() {
     }
   }, [bills]);
 
+  const monthBills = useMemo(
+    () => filterBillsByMonth(bills, selectedMonth),
+    [bills, selectedMonth]
+  );
+
   const filteredAndSortedBills = useMemo(() => {
-    let filtered = filterBillsByStatus(bills, filterStatus);
-    
+    let filtered = filterBillsByStatus(monthBills, filterStatus);
+
     if (searchTerm) {
       filtered = filtered.filter((bill) =>
         bill.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -45,7 +54,7 @@ export default function Home() {
     }
 
     return sortBillsByUrgency(filtered);
-  }, [bills, filterStatus, searchTerm]);
+  }, [monthBills, filterStatus, searchTerm]);
 
   const handleSaveBill = (billData: Omit<Bill, 'id' | 'createdAt'>, recurrence?: RecurrenceInput) => {
     if (editingBill) {
@@ -123,7 +132,7 @@ export default function Home() {
       <main className="container mx-auto px-4 py-6 sm:py-8">
         {/* Dashboard */}
         <section className="mb-8">
-          <Dashboard bills={bills} />
+          <Dashboard bills={monthBills} selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
         </section>
 
         {/* Filters */}
@@ -164,7 +173,7 @@ export default function Home() {
           ) : (
             <div className="space-y-3 sm:space-y-4">
               <p className="text-xs sm:text-sm text-gray-600">
-                Exibindo {filteredAndSortedBills.length} de {bills.length} fatura{bills.length !== 1 ? 's' : ''}
+                Exibindo {filteredAndSortedBills.length} de {monthBills.length} fatura{monthBills.length !== 1 ? 's' : ''} do mês
               </p>
               {filteredAndSortedBills.map((bill) => (
                 <BillCard
