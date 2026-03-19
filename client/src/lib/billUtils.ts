@@ -1,4 +1,4 @@
-import { Bill } from '@/hooks/useBills';
+import { Bill, calculateNextDueDate } from '@/hooks/useBills';
 
 export type UrgencyLevel = 'overdue' | 'urgent' | 'warning' | 'normal' | 'paid';
 
@@ -140,8 +140,56 @@ export function filterBillsByStatus(
   });
 }
 
+/**
+ * Filtra bills por mês. Para faturas recorrentes, projeta a data de vencimento
+ * da parcela correspondente ao mês selecionado.
+ */
 export function filterBillsByMonth(bills: Bill[], yearMonth: string): Bill[] {
-  return bills.filter((bill) => bill.dueDate.startsWith(yearMonth));
+  const result: Bill[] = [];
+
+  for (const bill of bills) {
+    // Fatura simples ou já quitada: checar se o vencimento cai no mês
+    if (!bill.recurrence) {
+      if (bill.dueDate.startsWith(yearMonth)) {
+        result.push(bill);
+      }
+      continue;
+    }
+
+    // Fatura recorrente já totalmente paga: mostrar no mês do último vencimento
+    if (bill.paid) {
+      if (bill.dueDate.startsWith(yearMonth)) {
+        result.push(bill);
+      }
+      continue;
+    }
+
+    // Fatura recorrente: checar se alguma parcela restante cai no mês
+    const remaining = bill.recurrence.totalInstallments - bill.recurrence.paidInstallments;
+    for (let i = 0; i < remaining; i++) {
+      const futureDate = calculateNextDueDate(bill.dueDate, bill.recurrence.frequency, i);
+      if (futureDate.startsWith(yearMonth)) {
+        // Retorna o bill com a dueDate projetada para esse mês
+        // e o número da parcela correspondente
+        result.push({
+          ...bill,
+          dueDate: futureDate,
+          recurrence: {
+            ...bill.recurrence,
+            // Mostrar qual parcela é neste mês (paidInstallments + offset + 1)
+            paidInstallments: bill.recurrence.paidInstallments + i,
+          },
+        });
+        break;
+      }
+      // Otimização: se já passou do mês alvo, parar
+      if (futureDate > yearMonth + '-31') {
+        break;
+      }
+    }
+  }
+
+  return result;
 }
 
 export function calculateSummary(bills: Bill[]) {

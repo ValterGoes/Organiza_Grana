@@ -8,9 +8,11 @@ interface BillCardProps {
   onMarkAsPaid: (id: string) => void;
   onDelete: (id: string) => void;
   onEdit: (bill: Bill) => void;
+  /** True when this card shows a future projected installment (not the next due) */
+  isProjected?: boolean;
 }
 
-export function BillCard({ bill, onMarkAsPaid, onDelete, onEdit }: BillCardProps) {
+export function BillCard({ bill, onMarkAsPaid, onDelete, onEdit, isProjected }: BillCardProps) {
   const status = calculateBillStatus(bill);
   const rec = bill.recurrence;
   const remaining = rec ? rec.totalInstallments - rec.paidInstallments : 0;
@@ -77,7 +79,7 @@ export function BillCard({ bill, onMarkAsPaid, onDelete, onEdit }: BillCardProps
           )}
         </div>
         <div className="flex flex-wrap gap-2">
-          {!bill.paid && (
+          {!bill.paid && !isProjected && (
             <Button
               size="sm"
               variant="outline"
@@ -90,6 +92,11 @@ export function BillCard({ bill, onMarkAsPaid, onDelete, onEdit }: BillCardProps
                 {rec ? `Pagar ${rec.paidInstallments + 1}ª` : 'Pagar'}
               </span>
             </Button>
+          )}
+          {isProjected && (
+            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-500">
+              Futura
+            </span>
           )}
           <Button
             size="sm"

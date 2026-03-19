@@ -44,6 +44,19 @@ export default function Home() {
     [bills, selectedMonth]
   );
 
+  // IDs de faturas projetadas (parcela futura, não a próxima a vencer)
+  const projectedIds = useMemo(() => {
+    const set = new Set<string>();
+    const originalMap = new Map(bills.map((b) => [b.id, b.dueDate]));
+    for (const mb of monthBills) {
+      const original = originalMap.get(mb.id);
+      if (original && mb.dueDate !== original) {
+        set.add(mb.id);
+      }
+    }
+    return set;
+  }, [bills, monthBills]);
+
   const filteredAndSortedBills = useMemo(() => {
     let filtered = filterBillsByStatus(monthBills, filterStatus);
 
@@ -182,6 +195,7 @@ export default function Home() {
                   onMarkAsPaid={markAsPaid}
                   onDelete={handleDeleteBill}
                   onEdit={handleEditBill}
+                  isProjected={projectedIds.has(bill.id)}
                 />
               ))}
             </div>

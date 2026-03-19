@@ -29,7 +29,7 @@ export interface RecurrenceInput {
 const STORAGE_KEY = 'gerenciador-vencimentos-bills';
 const NOTIFICATION_SCHEDULE_KEY = 'gerenciador-vencimentos-notifications-schedule';
 
-function calculateNextDueDate(baseDate: string, frequency: RecurrenceInput['frequency'], offset: number): string {
+export function calculateNextDueDate(baseDate: string, frequency: RecurrenceInput['frequency'], offset: number): string {
   const date = new Date(baseDate + 'T12:00:00');
   switch (frequency) {
     case 'weekly':
