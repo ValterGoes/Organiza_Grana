@@ -7,7 +7,8 @@ Aplicação web PWA para gerenciamento de faturas, boletos e cobranças com foco
 ### Vencimentos
 - **Gestão de Faturas** — Cadastro, edição e exclusão de faturas, boletos e cobranças
 - **Faturas Recorrentes** — Boletos com valor fixo que avançam automaticamente a data de vencimento após pagamento (ex: aluguel, internet, streaming)
-- **Dashboard Financeiro** — Resumo visual com totais (pendente, pago, vencido)
+- **Navegação por Mês** — Seletor de mês no dashboard para visualizar faturas de qualquer período
+- **Dashboard Financeiro** — Resumo visual com totais do mês selecionado (pendente, pago, vencido)
 - **Sistema de Urgência Visual** — Cards com indicadores coloridos por proximidade do vencimento (vermelho, amarelo, verde)
 - **Busca e Filtros** — Pesquisa por descrição e filtro por status (todas, pendentes, pagas, vencidas)
 - **Notificações** — Alertas via browser notifications para faturas próximas do vencimento
