@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useBills, Bill } from '@/hooks/useBills';
+import { useBills, Bill, RecurrenceInput } from '@/hooks/useBills';
 import { BillCard } from '@/components/BillCard';
 import { BillModal } from '@/components/BillModal';
 import { Dashboard } from '@/components/Dashboard';
@@ -22,7 +22,7 @@ import { toast } from 'sonner';
  */
 
 export default function Home() {
-  const { bills, isLoading, addBill, updateBill, deleteBill, markAsPaid } = useBills();
+  const { bills, isLoading, addBill, updateBill, deleteBill, deleteRecurrenceSeries, markAsPaid } = useBills();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBill, setEditingBill] = useState<Bill | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,10 +47,13 @@ export default function Home() {
     return sortBillsByUrgency(filtered);
   }, [bills, filterStatus, searchTerm]);
 
-  const handleSaveBill = (billData: Omit<Bill, 'id' | 'createdAt'>) => {
+  const handleSaveBill = (billData: Omit<Bill, 'id' | 'createdAt'>, recurrence?: RecurrenceInput) => {
     if (editingBill) {
       updateBill(editingBill.id, billData);
       toast.success('Fatura atualizada com sucesso!');
+    } else if (recurrence) {
+      addBill(billData, recurrence);
+      toast.success(`${recurrence.totalInstallments} parcelas criadas com sucesso!`);
     } else {
       addBill(billData);
       toast.success('Fatura criada com sucesso!');
@@ -62,6 +65,13 @@ export default function Home() {
     if (confirm('Tem certeza que deseja deletar esta fatura?')) {
       deleteBill(id);
       toast.success('Fatura deletada com sucesso!');
+    }
+  };
+
+  const handleDeleteSeries = (seriesId: string) => {
+    if (confirm('Tem certeza que deseja deletar TODAS as parcelas desta série?')) {
+      deleteRecurrenceSeries(seriesId);
+      toast.success('Série recorrente deletada com sucesso!');
     }
   };
 
@@ -168,6 +178,7 @@ export default function Home() {
                   bill={bill}
                   onMarkAsPaid={markAsPaid}
                   onDelete={handleDeleteBill}
+                  onDeleteSeries={handleDeleteSeries}
                   onEdit={handleEditBill}
                 />
               ))}

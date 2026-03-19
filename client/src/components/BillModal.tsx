@@ -2,12 +2,13 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Bill } from '@/hooks/useBills';
+import { Bill, RecurrenceInput } from '@/hooks/useBills';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 
 const billSchema = z.object({
@@ -18,6 +19,9 @@ const billSchema = z.object({
   alertDays: z.number().int().min(0, 'Deve ser 0 ou mais'),
   notes: z.string().default(''),
   paid: z.boolean(),
+  isRecurring: z.boolean().default(false),
+  recurrenceFrequency: z.enum(['monthly', 'weekly', 'biweekly']).default('monthly'),
+  recurrenceInstallments: z.number().int().min(2, 'Mínimo 2 parcelas').max(60, 'Máximo 60 parcelas').default(12),
 });
 
 type BillFormData = z.infer<typeof billSchema>;
@@ -25,7 +29,7 @@ type BillFormData = z.infer<typeof billSchema>;
 interface BillModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (bill: Omit<Bill, 'id' | 'createdAt'>) => void;
+  onSave: (bill: Omit<Bill, 'id' | 'createdAt'>, recurrence?: RecurrenceInput) => void;
   initialBill?: Bill;
 }
 
@@ -48,11 +52,16 @@ export function BillModal({ isOpen, onClose, onSave, initialBill }: BillModalPro
       alertDays: 7,
       notes: '',
       paid: false,
+      isRecurring: false,
+      recurrenceFrequency: 'monthly',
+      recurrenceInstallments: 12,
     },
   });
 
   const category = watch('category');
   const paid = watch('paid');
+  const isRecurring = watch('isRecurring');
+  const isEditingRecurring = !!initialBill?.recurrence;
 
   useEffect(() => {
     if (initialBill) {
@@ -64,6 +73,9 @@ export function BillModal({ isOpen, onClose, onSave, initialBill }: BillModalPro
         alertDays: initialBill.alertDays,
         notes: initialBill.notes || '',
         paid: initialBill.paid,
+        isRecurring: false,
+        recurrenceFrequency: initialBill.recurrence?.frequency || 'monthly',
+        recurrenceInstallments: initialBill.recurrence?.totalInstallments || 12,
       });
     } else {
       reset({
@@ -74,12 +86,15 @@ export function BillModal({ isOpen, onClose, onSave, initialBill }: BillModalPro
         alertDays: 7,
         notes: '',
         paid: false,
+        isRecurring: false,
+        recurrenceFrequency: 'monthly',
+        recurrenceInstallments: 12,
       });
     }
   }, [initialBill, isOpen, reset]);
 
   const onSubmit = (data: BillFormData) => {
-    onSave({
+    const billData: Omit<Bill, 'id' | 'createdAt'> = {
       description: data.description,
       amount: data.amount,
       dueDate: data.dueDate,
@@ -87,7 +102,14 @@ export function BillModal({ isOpen, onClose, onSave, initialBill }: BillModalPro
       alertDays: data.alertDays,
       notes: data.notes || undefined,
       paid: data.paid,
-    });
+    };
+
+    const recurrence: RecurrenceInput | undefined =
+      data.isRecurring && !initialBill
+        ? { frequency: data.recurrenceFrequency, totalInstallments: data.recurrenceInstallments }
+        : undefined;
+
+    onSave(billData, recurrence);
     onClose();
   };
 
@@ -182,6 +204,65 @@ export function BillModal({ isOpen, onClose, onSave, initialBill }: BillModalPro
               </SelectContent>
             </Select>
           </div>
+
+          {/* Recorrência - apenas ao criar nova fatura */}
+          {!initialBill && (
+            <div className="space-y-3 rounded-lg border border-gray-200 p-3">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="isRecurring" className="cursor-pointer">Fatura Recorrente</Label>
+                <Switch
+                  id="isRecurring"
+                  checked={isRecurring}
+                  onCheckedChange={(checked) => setValue('isRecurring', checked)}
+                />
+              </div>
+
+              {isRecurring && (
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <Label htmlFor="recurrenceFrequency" className="text-xs">Frequência</Label>
+                    <Select
+                      value={watch('recurrenceFrequency')}
+                      onValueChange={(value) => setValue('recurrenceFrequency', value as BillFormData['recurrenceFrequency'])}
+                    >
+                      <SelectTrigger id="recurrenceFrequency">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="weekly">Semanal</SelectItem>
+                        <SelectItem value="biweekly">Quinzenal</SelectItem>
+                        <SelectItem value="monthly">Mensal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="recurrenceInstallments" className="text-xs">Parcelas</Label>
+                    <Input
+                      id="recurrenceInstallments"
+                      type="number"
+                      min={2}
+                      max={60}
+                      {...register('recurrenceInstallments', { valueAsNumber: true })}
+                    />
+                    {errors.recurrenceInstallments && (
+                      <p className="mt-1 text-xs text-red-600">{errors.recurrenceInstallments.message}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Indicador de recorrência ao editar */}
+          {isEditingRecurring && initialBill?.recurrence && (
+            <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+              Parcela {initialBill.recurrence.currentInstallment} de {initialBill.recurrence.totalInstallments}
+              {' · '}
+              {initialBill.recurrence.frequency === 'monthly' && 'Mensal'}
+              {initialBill.recurrence.frequency === 'weekly' && 'Semanal'}
+              {initialBill.recurrence.frequency === 'biweekly' && 'Quinzenal'}
+            </div>
+          )}
 
           <div>
             <Label htmlFor="notes">Notas</Label>

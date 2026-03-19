@@ -1,16 +1,17 @@
 import { Bill } from '@/hooks/useBills';
 import { calculateBillStatus, formatCurrency, formatDate, getUrgencyIcon } from '@/lib/billUtils';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Trash2, Edit2 } from 'lucide-react';
+import { CheckCircle2, Trash2, Edit2, Repeat, Trash } from 'lucide-react';
 
 interface BillCardProps {
   bill: Bill;
   onMarkAsPaid: (id: string) => void;
   onDelete: (id: string) => void;
+  onDeleteSeries?: (seriesId: string) => void;
   onEdit: (bill: Bill) => void;
 }
 
-export function BillCard({ bill, onMarkAsPaid, onDelete, onEdit }: BillCardProps) {
+export function BillCard({ bill, onMarkAsPaid, onDelete, onDeleteSeries, onEdit }: BillCardProps) {
   const status = calculateBillStatus(bill);
 
   return (
@@ -40,6 +41,12 @@ export function BillCard({ bill, onMarkAsPaid, onDelete, onEdit }: BillCardProps
             {bill.category === 'boleto' && 'Boleto'}
             {bill.category === 'cobranca' && 'Cobrança'}
           </span>
+          {bill.recurrence && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
+              <Repeat className="h-3 w-3" />
+              {bill.recurrence.currentInstallment}/{bill.recurrence.totalInstallments}
+            </span>
+          )}
           {bill.paid && (
             <span className="inline-block rounded-full bg-green-200 px-2 py-1 text-xs font-medium text-green-700">
               Pago
@@ -79,6 +86,18 @@ export function BillCard({ bill, onMarkAsPaid, onDelete, onEdit }: BillCardProps
             <Trash2 className="h-4 w-4" />
             <span className="hidden sm:inline">Deletar</span>
           </Button>
+          {bill.recurrence && onDeleteSeries && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onDeleteSeries(bill.recurrence!.seriesId)}
+              className="gap-1 flex-1 sm:flex-none text-red-600 hover:bg-red-50"
+              title="Deletar toda a série recorrente"
+            >
+              <Trash className="h-4 w-4" />
+              <span className="hidden sm:inline">Série</span>
+            </Button>
+          )}
         </div>
       </div>
 

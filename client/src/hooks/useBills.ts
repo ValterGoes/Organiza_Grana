@@ -2,6 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { nanoid } from 'nanoid';
 import * as secureStorage from '@/lib/secureStorage';
 
+export interface Recurrence {
+  frequency: 'monthly' | 'weekly' | 'biweekly';
+  totalInstallments: number;
+  currentInstallment: number;
+  seriesId: string;
+}
+
 export interface Bill {
   id: string;
   description: string;
@@ -11,11 +18,33 @@ export interface Bill {
   paid: boolean;
   alertDays: number;
   notes?: string;
+  recurrence?: Recurrence;
   createdAt: string;
+}
+
+export interface RecurrenceInput {
+  frequency: 'monthly' | 'weekly' | 'biweekly';
+  totalInstallments: number;
 }
 
 const STORAGE_KEY = 'gerenciador-vencimentos-bills';
 const NOTIFICATION_SCHEDULE_KEY = 'gerenciador-vencimentos-notifications-schedule';
+
+function calculateNextDueDate(baseDate: string, frequency: RecurrenceInput['frequency'], offset: number): string {
+  const date = new Date(baseDate + 'T12:00:00');
+  switch (frequency) {
+    case 'weekly':
+      date.setDate(date.getDate() + offset * 7);
+      break;
+    case 'biweekly':
+      date.setDate(date.getDate() + offset * 14);
+      break;
+    case 'monthly':
+      date.setMonth(date.getMonth() + offset);
+      break;
+  }
+  return date.toISOString().split('T')[0];
+}
 
 function updateNotificationSchedule(bills: Bill[]) {
   // Armazena apenas dados mínimos (sem valores financeiros) para o Service Worker
@@ -67,7 +96,30 @@ export function useBills() {
     }
   }, [bills, isLoading]);
 
-  const addBill = useCallback((bill: Omit<Bill, 'id' | 'createdAt'>) => {
+  const addBill = useCallback((bill: Omit<Bill, 'id' | 'createdAt'>, recurrenceInput?: RecurrenceInput) => {
+    if (recurrenceInput && recurrenceInput.totalInstallments > 1) {
+      const seriesId = nanoid();
+      const newBills: Bill[] = [];
+
+      for (let i = 0; i < recurrenceInput.totalInstallments; i++) {
+        newBills.push({
+          ...bill,
+          id: nanoid(),
+          dueDate: calculateNextDueDate(bill.dueDate, recurrenceInput.frequency, i),
+          recurrence: {
+            frequency: recurrenceInput.frequency,
+            totalInstallments: recurrenceInput.totalInstallments,
+            currentInstallment: i + 1,
+            seriesId,
+          },
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      setBills((prev) => [...newBills, ...prev]);
+      return newBills[0];
+    }
+
     const newBill: Bill = {
       ...bill,
       id: nanoid(),
@@ -87,6 +139,18 @@ export function useBills() {
     setBills((prev) => prev.filter((bill) => bill.id !== id));
   }, []);
 
+  const deleteRecurrenceSeries = useCallback((seriesId: string) => {
+    setBills((prev) => prev.filter((bill) => bill.recurrence?.seriesId !== seriesId));
+  }, []);
+
+  const markSeriesAsPaid = useCallback((seriesId: string) => {
+    setBills((prev) =>
+      prev.map((bill) =>
+        bill.recurrence?.seriesId === seriesId ? { ...bill, paid: true } : bill
+      )
+    );
+  }, []);
+
   const markAsPaid = useCallback((id: string) => {
     updateBill(id, { paid: true });
   }, [updateBill]);
@@ -97,6 +161,8 @@ export function useBills() {
     addBill,
     updateBill,
     deleteBill,
+    deleteRecurrenceSeries,
     markAsPaid,
+    markSeriesAsPaid,
   };
 }
