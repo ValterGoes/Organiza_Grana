@@ -5,8 +5,7 @@ import * as secureStorage from '@/lib/secureStorage';
 export interface Recurrence {
   frequency: 'monthly' | 'weekly' | 'biweekly';
   totalInstallments: number;
-  currentInstallment: number;
-  seriesId: string;
+  paidInstallments: number;
 }
 
 export interface Bill {
@@ -97,32 +96,12 @@ export function useBills() {
   }, [bills, isLoading]);
 
   const addBill = useCallback((bill: Omit<Bill, 'id' | 'createdAt'>, recurrenceInput?: RecurrenceInput) => {
-    if (recurrenceInput && recurrenceInput.totalInstallments > 1) {
-      const seriesId = nanoid();
-      const newBills: Bill[] = [];
-
-      for (let i = 0; i < recurrenceInput.totalInstallments; i++) {
-        newBills.push({
-          ...bill,
-          id: nanoid(),
-          dueDate: calculateNextDueDate(bill.dueDate, recurrenceInput.frequency, i),
-          recurrence: {
-            frequency: recurrenceInput.frequency,
-            totalInstallments: recurrenceInput.totalInstallments,
-            currentInstallment: i + 1,
-            seriesId,
-          },
-          createdAt: new Date().toISOString(),
-        });
-      }
-
-      setBills((prev) => [...newBills, ...prev]);
-      return newBills[0];
-    }
-
     const newBill: Bill = {
       ...bill,
       id: nanoid(),
+      recurrence: recurrenceInput
+        ? { frequency: recurrenceInput.frequency, totalInstallments: recurrenceInput.totalInstallments, paidInstallments: 0 }
+        : undefined,
       createdAt: new Date().toISOString(),
     };
     setBills((prev) => [newBill, ...prev]);
@@ -139,21 +118,34 @@ export function useBills() {
     setBills((prev) => prev.filter((bill) => bill.id !== id));
   }, []);
 
-  const deleteRecurrenceSeries = useCallback((seriesId: string) => {
-    setBills((prev) => prev.filter((bill) => bill.recurrence?.seriesId !== seriesId));
-  }, []);
-
-  const markSeriesAsPaid = useCallback((seriesId: string) => {
+  const markAsPaid = useCallback((id: string) => {
     setBills((prev) =>
-      prev.map((bill) =>
-        bill.recurrence?.seriesId === seriesId ? { ...bill, paid: true } : bill
-      )
+      prev.map((bill) => {
+        if (bill.id !== id) return bill;
+
+        // Fatura recorrente: pagar uma parcela e avançar a data
+        if (bill.recurrence) {
+          const newPaid = bill.recurrence.paidInstallments + 1;
+          const allPaid = newPaid >= bill.recurrence.totalInstallments;
+
+          return {
+            ...bill,
+            paid: allPaid,
+            dueDate: allPaid
+              ? bill.dueDate
+              : calculateNextDueDate(bill.dueDate, bill.recurrence.frequency, 1),
+            recurrence: {
+              ...bill.recurrence,
+              paidInstallments: newPaid,
+            },
+          };
+        }
+
+        // Fatura simples
+        return { ...bill, paid: true };
+      })
     );
   }, []);
-
-  const markAsPaid = useCallback((id: string) => {
-    updateBill(id, { paid: true });
-  }, [updateBill]);
 
   return {
     bills,
@@ -161,8 +153,6 @@ export function useBills() {
     addBill,
     updateBill,
     deleteBill,
-    deleteRecurrenceSeries,
     markAsPaid,
-    markSeriesAsPaid,
   };
 }

@@ -256,7 +256,9 @@ export function BillModal({ isOpen, onClose, onSave, initialBill }: BillModalPro
           {/* Indicador de recorrência ao editar */}
           {isEditingRecurring && initialBill?.recurrence && (
             <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
-              Parcela {initialBill.recurrence.currentInstallment} de {initialBill.recurrence.totalInstallments}
+              {initialBill.recurrence.paidInstallments}/{initialBill.recurrence.totalInstallments} parcelas pagas
+              {' · '}
+              {initialBill.recurrence.totalInstallments - initialBill.recurrence.paidInstallments} restantes
               {' · '}
               {initialBill.recurrence.frequency === 'monthly' && 'Mensal'}
               {initialBill.recurrence.frequency === 'weekly' && 'Semanal'}

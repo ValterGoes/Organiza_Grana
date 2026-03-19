@@ -1,18 +1,19 @@
 import { Bill } from '@/hooks/useBills';
 import { calculateBillStatus, formatCurrency, formatDate, getUrgencyIcon } from '@/lib/billUtils';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Trash2, Edit2, Repeat, Trash } from 'lucide-react';
+import { CheckCircle2, Trash2, Edit2, Repeat } from 'lucide-react';
 
 interface BillCardProps {
   bill: Bill;
   onMarkAsPaid: (id: string) => void;
   onDelete: (id: string) => void;
-  onDeleteSeries?: (seriesId: string) => void;
   onEdit: (bill: Bill) => void;
 }
 
-export function BillCard({ bill, onMarkAsPaid, onDelete, onDeleteSeries, onEdit }: BillCardProps) {
+export function BillCard({ bill, onMarkAsPaid, onDelete, onEdit }: BillCardProps) {
   const status = calculateBillStatus(bill);
+  const rec = bill.recurrence;
+  const remaining = rec ? rec.totalInstallments - rec.paidInstallments : 0;
 
   return (
     <div
@@ -34,6 +35,29 @@ export function BillCard({ bill, onMarkAsPaid, onDelete, onDeleteSeries, onEdit 
         </div>
       </div>
 
+      {/* Barra de progresso para recorrentes */}
+      {rec && (
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="inline-flex items-center gap-1 font-medium text-blue-700">
+              <Repeat className="h-3 w-3" />
+              {rec.frequency === 'monthly' && 'Mensal'}
+              {rec.frequency === 'weekly' && 'Semanal'}
+              {rec.frequency === 'biweekly' && 'Quinzenal'}
+            </span>
+            <span className="text-gray-600">
+              {rec.paidInstallments}/{rec.totalInstallments} pagas · {remaining} restante{remaining !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+            <div
+              className="h-full rounded-full bg-blue-500 transition-all duration-300"
+              style={{ width: `${(rec.paidInstallments / rec.totalInstallments) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col gap-3 border-t border-gray-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-block rounded-full bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700">
@@ -41,15 +65,14 @@ export function BillCard({ bill, onMarkAsPaid, onDelete, onDeleteSeries, onEdit 
             {bill.category === 'boleto' && 'Boleto'}
             {bill.category === 'cobranca' && 'Cobrança'}
           </span>
-          {bill.recurrence && (
+          {rec && !bill.paid && (
             <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
-              <Repeat className="h-3 w-3" />
-              {bill.recurrence.currentInstallment}/{bill.recurrence.totalInstallments}
+              Parcela {rec.paidInstallments + 1} de {rec.totalInstallments}
             </span>
           )}
           {bill.paid && (
             <span className="inline-block rounded-full bg-green-200 px-2 py-1 text-xs font-medium text-green-700">
-              Pago
+              {rec ? 'Quitado' : 'Pago'}
             </span>
           )}
         </div>
@@ -60,10 +83,12 @@ export function BillCard({ bill, onMarkAsPaid, onDelete, onDeleteSeries, onEdit 
               variant="outline"
               onClick={() => onMarkAsPaid(bill.id)}
               className="gap-1 flex-1 sm:flex-none"
-              title="Marcar como pago"
+              title={rec ? `Pagar parcela ${rec.paidInstallments + 1}` : 'Marcar como pago'}
             >
               <CheckCircle2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Pagar</span>
+              <span className="hidden sm:inline">
+                {rec ? `Pagar ${rec.paidInstallments + 1}ª` : 'Pagar'}
+              </span>
             </Button>
           )}
           <Button
@@ -86,18 +111,6 @@ export function BillCard({ bill, onMarkAsPaid, onDelete, onDeleteSeries, onEdit 
             <Trash2 className="h-4 w-4" />
             <span className="hidden sm:inline">Deletar</span>
           </Button>
-          {bill.recurrence && onDeleteSeries && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onDeleteSeries(bill.recurrence!.seriesId)}
-              className="gap-1 flex-1 sm:flex-none text-red-600 hover:bg-red-50"
-              title="Deletar toda a série recorrente"
-            >
-              <Trash className="h-4 w-4" />
-              <span className="hidden sm:inline">Série</span>
-            </Button>
-          )}
         </div>
       </div>
 

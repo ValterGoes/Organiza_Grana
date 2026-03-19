@@ -22,7 +22,7 @@ import { toast } from 'sonner';
  */
 
 export default function Home() {
-  const { bills, isLoading, addBill, updateBill, deleteBill, deleteRecurrenceSeries, markAsPaid } = useBills();
+  const { bills, isLoading, addBill, updateBill, deleteBill, markAsPaid } = useBills();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBill, setEditingBill] = useState<Bill | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,7 +53,7 @@ export default function Home() {
       toast.success('Fatura atualizada com sucesso!');
     } else if (recurrence) {
       addBill(billData, recurrence);
-      toast.success(`${recurrence.totalInstallments} parcelas criadas com sucesso!`);
+      toast.success(`Fatura recorrente criada com ${recurrence.totalInstallments} parcelas!`);
     } else {
       addBill(billData);
       toast.success('Fatura criada com sucesso!');
@@ -68,12 +68,6 @@ export default function Home() {
     }
   };
 
-  const handleDeleteSeries = (seriesId: string) => {
-    if (confirm('Tem certeza que deseja deletar TODAS as parcelas desta série?')) {
-      deleteRecurrenceSeries(seriesId);
-      toast.success('Série recorrente deletada com sucesso!');
-    }
-  };
 
   const handleEditBill = (bill: Bill) => {
     setEditingBill(bill);
@@ -178,7 +172,6 @@ export default function Home() {
                   bill={bill}
                   onMarkAsPaid={markAsPaid}
                   onDelete={handleDeleteBill}
-                  onDeleteSeries={handleDeleteSeries}
                   onEdit={handleEditBill}
                 />
               ))}
