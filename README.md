@@ -1,6 +1,6 @@
-# Gerenciador de Vencimentos
+# Organiza Grana
 
-Aplicação web PWA para gerenciamento de faturas, boletos e cobranças com foco em segurança e usabilidade.
+Aplicação web PWA para controle de contas e gastos pessoais com foco em segurança e usabilidade.
 
 ## Funcionalidades
 
@@ -21,11 +21,12 @@ Aplicação web PWA para gerenciamento de faturas, boletos e cobranças com foco
 - **Exclusão Rápida** — Remova gastos com um clique
 
 ### Geral
+- **Identidade Visual** — Paleta verde (#3BA36C) e laranja (#F79030), headers com gradiente e logo personalizada
 - **Navegação por Abas** — Bottom navigation para alternar entre Vencimentos e Gastos Diários
-- **Proteção por PIN** — Tela de bloqueio com PIN numérico e auto-lock ao sair do app
+- **Proteção por PIN** — Tela de bloqueio com PIN numérico, logo e auto-lock ao sair do app
 - **Criptografia** — Dados financeiros criptografados com AES-256-GCM via Web Crypto API (PBKDF2 para derivação de chave)
 - **PWA** — Instalável no dispositivo, funciona offline com Service Worker
-- **Tema Claro/Escuro** — Suporte a dark mode
+- **Tema Claro/Escuro** — Suporte a dark mode com cores da marca adaptadas
 - **Responsivo** — Interface adaptada para desktop e mobile
 
 ## Stack
