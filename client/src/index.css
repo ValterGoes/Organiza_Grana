@@ -225,4 +225,9 @@
   .transition-smooth {
     @apply transition-all duration-150 ease-in-out;
   }
+
+  /* Safe area for bottom nav on notched phones */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
