@@ -4,11 +4,22 @@ Aplicação web PWA para gerenciamento de faturas, boletos e cobranças com foco
 
 ## Funcionalidades
 
+### Vencimentos
 - **Gestão de Faturas** — Cadastro, edição e exclusão de faturas, boletos e cobranças
+- **Faturas Recorrentes** — Boletos com valor fixo que avançam automaticamente a data de vencimento após pagamento (ex: aluguel, internet, streaming)
 - **Dashboard Financeiro** — Resumo visual com totais (pendente, pago, vencido)
 - **Sistema de Urgência Visual** — Cards com indicadores coloridos por proximidade do vencimento (vermelho, amarelo, verde)
 - **Busca e Filtros** — Pesquisa por descrição e filtro por status (todas, pendentes, pagas, vencidas)
 - **Notificações** — Alertas via browser notifications para faturas próximas do vencimento
+
+### Gastos Diários
+- **Registro Rápido** — Adicione gastos do dia com descrição e valor em um toque
+- **Resumo por Período** — Totais de hoje, ontem e do mês corrente
+- **Histórico Mensal** — Visualização dos gastos agrupados por dia com totais diários
+- **Exclusão Rápida** — Remova gastos com um clique
+
+### Geral
+- **Navegação por Abas** — Bottom navigation para alternar entre Vencimentos e Gastos Diários
 - **Proteção por PIN** — Tela de bloqueio com PIN numérico e auto-lock ao sair do app
 - **Criptografia** — Dados financeiros criptografados com AES-256-GCM via Web Crypto API (PBKDF2 para derivação de chave)
 - **PWA** — Instalável no dispositivo, funciona offline com Service Worker
@@ -71,9 +82,9 @@ client/
 ├── src/
 │   ├── components/       # Componentes React (BillCard, BillModal, Dashboard, PinScreen...)
 │   ├── contexts/         # AuthContext (PIN), ThemeContext
-│   ├── hooks/            # useBills (CRUD + persistência criptografada)
+│   ├── hooks/            # useBills, useExpenses (CRUD + persistência criptografada)
 │   ├── lib/              # Utilitários (crypto, secureStorage, notifications, billUtils)
-│   └── pages/            # Home, NotFound
+│   └── pages/            # Home, Expenses, NotFound
 server/
 └── index.ts              # Express - serve arquivos estáticos
 ```
