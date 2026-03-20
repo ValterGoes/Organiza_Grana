@@ -13,7 +13,7 @@ export default defineConfig({
       includeAssets: ["Logo.webp", "icon.svg"],
       manifest: {
         name: "Organiza Grana",
-        short_name: "Organiza Grana",
+        short_name: " ",
         description: "Controle suas contas e gastos com facilidade",
         theme_color: "#3BA36C",
         background_color: "#f9fafb",
