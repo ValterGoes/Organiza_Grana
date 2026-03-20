@@ -102,7 +102,7 @@ export function Dashboard({ bills, allBills, selectedMonth, onMonthChange }: Das
       </div>
 
       {/* Stats do mês */}
-      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -114,7 +114,7 @@ export function Dashboard({ bills, allBills, selectedMonth, onMonthChange }: Das
                 <span className="text-xs sm:text-sm font-medium opacity-75">{stat.label}</span>
                 <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <p className="text-lg sm:text-2xl font-bold break-words">{stat.value}</p>
+              <p className="text-lg sm:text-2xl font-bold">{stat.value}</p>
             </div>
           );
         })}
