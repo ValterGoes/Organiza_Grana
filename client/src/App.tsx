@@ -31,7 +31,14 @@ function Router() {
 function AppContent() {
   const { state } = useAuth();
 
-  if (state === 'loading' || state === 'setup' || state === 'locked') {
+  // Durante loading, mostrar apenas o fundo verde sem flash do logo
+  if (state === 'loading') {
+    return (
+      <div className="flex min-h-screen bg-gradient-to-b from-[#3BA36C] via-[#2d8a56] to-[#1f6e40]" />
+    );
+  }
+
+  if (state === 'setup' || state === 'locked') {
     return <PinScreen />;
   }
 
