@@ -195,10 +195,6 @@ export function filterBillsByMonth(bills: Bill[], yearMonth: string): Bill[] {
 export function calculateSummary(bills: Bill[]) {
   const total = bills.reduce((sum, bill) => sum + bill.amount, 0);
 
-  const pending = bills
-    .filter((bill) => !bill.paid)
-    .reduce((sum, bill) => sum + bill.amount, 0);
-
   const paid = bills
     .filter((bill) => bill.paid)
     .reduce((sum, bill) => sum + bill.amount, 0);
@@ -207,6 +203,15 @@ export function calculateSummary(bills: Bill[]) {
     .filter((bill) => {
       const status = calculateBillStatus(bill);
       return status.isOverdue;
+    })
+    .reduce((sum, bill) => sum + bill.amount, 0);
+
+  // Pendente = não paga E não vencida (dentro do prazo)
+  const pending = bills
+    .filter((bill) => {
+      if (bill.paid) return false;
+      const status = calculateBillStatus(bill);
+      return !status.isOverdue;
     })
     .reduce((sum, bill) => sum + bill.amount, 0);
 

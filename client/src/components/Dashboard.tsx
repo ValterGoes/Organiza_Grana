@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { Bill } from '@/hooks/useBills';
-import { calculateSummary, formatCurrency } from '@/lib/billUtils';
-import { AlertCircle, CheckCircle2, DollarSign, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { calculateSummary, calculateBillStatus, formatCurrency } from '@/lib/billUtils';
+import { AlertCircle, CheckCircle2, DollarSign, TrendingUp, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface DashboardProps {
   bills: Bill[];
+  allBills: Bill[];
   selectedMonth: string; // YYYY-MM
   onMonthChange: (month: string) => void;
 }
@@ -26,17 +28,18 @@ function getCurrentMonth(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
-export function Dashboard({ bills, selectedMonth, onMonthChange }: DashboardProps) {
+export function Dashboard({ bills, allBills, selectedMonth, onMonthChange }: DashboardProps) {
   const summary = calculateSummary(bills);
   const isCurrentMonth = selectedMonth === getCurrentMonth();
+  const [showOverdue, setShowOverdue] = useState(false);
 
-  const overdueBills = bills.filter((bill) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const dueDate = new Date(bill.dueDate);
-    dueDate.setHours(0, 0, 0, 0);
-    return dueDate < today && !bill.paid;
+  // Faturas vencidas de QUALQUER mês (não pagas e com data passada)
+  const overdueBills = allBills.filter((bill) => {
+    const status = calculateBillStatus(bill);
+    return status.isOverdue;
   });
+
+  const overdueTotal = overdueBills.reduce((sum, bill) => sum + bill.amount, 0);
 
   const stats = [
     {
@@ -56,12 +59,6 @@ export function Dashboard({ bills, selectedMonth, onMonthChange }: DashboardProp
       value: formatCurrency(summary.paid),
       icon: CheckCircle2,
       color: 'bg-green-50 text-green-700 border-l-green-500',
-    },
-    {
-      label: 'Vencido',
-      value: formatCurrency(summary.overdue),
-      icon: AlertCircle,
-      color: 'bg-red-50 text-red-700 border-l-red-500',
     },
   ];
 
@@ -104,8 +101,8 @@ export function Dashboard({ bills, selectedMonth, onMonthChange }: DashboardProp
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      {/* Stats do mês */}
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -123,20 +120,53 @@ export function Dashboard({ bills, selectedMonth, onMonthChange }: DashboardProp
         })}
       </div>
 
-      {/* Overdue Alert */}
+      {/* Faturas vencidas (global, colapsável) */}
       {overdueBills.length > 0 && (
-        <div className="rounded-lg border-l-4 border-l-red-500 bg-red-50 p-3 sm:p-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-700" />
-            <div className="min-w-0">
-              <h3 className="font-semibold text-red-900 text-sm sm:text-base">
-                {overdueBills.length} fatura{overdueBills.length !== 1 ? 's' : ''} vencida{overdueBills.length !== 1 ? 's' : ''}!
-              </h3>
-              <p className="mt-1 text-xs sm:text-sm text-red-700">
-                Total: <span className="font-semibold">{formatCurrency(summary.overdue)}</span>
-              </p>
+        <div className="rounded-lg border-l-4 border-l-red-500 bg-red-50">
+          <button
+            onClick={() => setShowOverdue(!showOverdue)}
+            className="flex w-full items-center justify-between p-3 sm:p-4"
+          >
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-700" />
+              <div className="text-left">
+                <h3 className="font-semibold text-red-900 text-sm sm:text-base">
+                  {overdueBills.length} fatura{overdueBills.length !== 1 ? 's' : ''} vencida{overdueBills.length !== 1 ? 's' : ''}
+                </h3>
+                <p className="text-xs sm:text-sm text-red-700">
+                  Total: <span className="font-semibold">{formatCurrency(overdueTotal)}</span>
+                </p>
+              </div>
             </div>
-          </div>
+            {showOverdue ? (
+              <ChevronUp className="h-5 w-5 text-red-500" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-red-500" />
+            )}
+          </button>
+
+          {showOverdue && (
+            <div className="border-t border-red-200 px-3 pb-3 sm:px-4 sm:pb-4">
+              <div className="mt-2 space-y-2">
+                {overdueBills.map((bill) => (
+                  <div
+                    key={bill.id}
+                    className="flex items-center justify-between rounded-md bg-white/60 px-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-red-900 truncate">{bill.description}</p>
+                      <p className="text-xs text-red-600">
+                        Venceu em {new Date(bill.dueDate + 'T12:00:00').toLocaleDateString('pt-BR')}
+                      </p>
+                    </div>
+                    <p className="text-sm font-bold text-red-800 ml-3 flex-shrink-0">
+                      {formatCurrency(bill.amount)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

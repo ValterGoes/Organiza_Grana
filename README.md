@@ -9,9 +9,9 @@ Aplicação web PWA para controle de contas e gastos pessoais com foco em segura
 - **Faturas Recorrentes** — Boletos com valor fixo que avançam automaticamente a data de vencimento após pagamento (ex: aluguel, internet, streaming)
 - **Projeção de Parcelas** — Parcelas futuras de faturas recorrentes são projetadas automaticamente nos meses correspondentes com badge "Futura", exibindo corretamente o número da parcela
 - **Navegação por Mês** — Seletor de mês no dashboard para visualizar faturas e parcelas projetadas de qualquer período
-- **Dashboard Financeiro** — Resumo visual com totais do mês selecionado (pendente, pago, vencido)
+- **Dashboard Financeiro** — Resumo visual com totais do mês (total, pendente, pago) e alerta global de faturas vencidas com lista colapsável
 - **Sistema de Urgência Visual** — Cards com indicadores coloridos por proximidade do vencimento (vermelho, amarelo, verde)
-- **Busca e Filtros** — Pesquisa por descrição e filtro por status (todas, pendentes, pagas, vencidas)
+- **Filtros** — Filtro por status (todas, pendentes, pagas, vencidas)
 - **Notificações** — Alertas via browser notifications para faturas próximas do vencimento
 
 ### Gastos Diários

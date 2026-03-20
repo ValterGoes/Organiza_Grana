@@ -6,11 +6,10 @@ import { Dashboard } from '@/components/Dashboard';
 import { AlertNotification } from '@/components/AlertNotification';
 import { NotificationPrompt } from '@/components/NotificationPrompt';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { sortBillsByUrgency, filterBillsByStatus, filterBillsByMonth } from '@/lib/billUtils';
 import { checkAndNotifyDueBills } from '@/lib/notifications';
-import { Plus, Search } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 /**
@@ -25,7 +24,6 @@ export default function Home() {
   const { bills, isLoading, addBill, updateBill, deleteBill, markAsPaid } = useBills();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBill, setEditingBill] = useState<Bill | undefined>();
-  const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'paid' | 'overdue'>('all');
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const d = new Date();
@@ -57,16 +55,9 @@ export default function Home() {
   }, [bills, monthBills]);
 
   const filteredAndSortedBills = useMemo(() => {
-    let filtered = filterBillsByStatus(monthBills, filterStatus);
-
-    if (searchTerm) {
-      filtered = filtered.filter((bill) =>
-        bill.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
+    const filtered = filterBillsByStatus(monthBills, filterStatus);
     return sortBillsByUrgency(filtered);
-  }, [monthBills, filterStatus, searchTerm]);
+  }, [monthBills, filterStatus]);
 
   const handleSaveBill = (billData: Omit<Bill, 'id' | 'createdAt'>, recurrence?: RecurrenceInput) => {
     if (editingBill) {
@@ -147,21 +138,11 @@ export default function Home() {
       <main className="container mx-auto px-4 py-6 sm:py-8">
         {/* Dashboard */}
         <section className="mb-8">
-          <Dashboard bills={monthBills} selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
+          <Dashboard bills={monthBills} allBills={bills} selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
         </section>
 
         {/* Filters */}
-        <section className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-            <Input
-              placeholder="Buscar faturas..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
+        <section className="mb-6">
           <Select value={filterStatus} onValueChange={(value) => setFilterStatus(value as typeof filterStatus)}>
             <SelectTrigger className="w-full sm:w-48">
               <SelectValue />
