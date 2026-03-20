@@ -243,7 +243,7 @@ export function calculateSummary(bills: Bill[]) {
     })
     .reduce((sum, bill) => sum + bill.amount, 0);
 
-  // Total do mês = todas as faturas do mês (incluindo vencidas deste mês)
+  // Total do mês = todas as faturas deste mês (vencidas de outros meses não entram pois filterBillsByMonth já filtra)
   const total = bills.reduce((sum, bill) => sum + bill.amount, 0);
 
   return { total, pending, paid };
