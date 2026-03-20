@@ -28,7 +28,7 @@ export function calculateBillStatus(bill: Bill): BillStatus {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const dueDate = new Date(bill.dueDate);
+  const dueDate = new Date(bill.dueDate + 'T12:00:00');
   dueDate.setHours(0, 0, 0, 0);
 
   const diffTime = dueDate.getTime() - today.getTime();
@@ -102,7 +102,7 @@ export function formatCurrency(amount: number): string {
 }
 
 export function formatDate(dateString: string): string {
-  const date = new Date(dateString);
+  const date = new Date(dateString + 'T12:00:00');
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
     month: '2-digit',
