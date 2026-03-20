@@ -165,8 +165,8 @@ export function filterBillsByMonth(bills: Bill[], yearMonth: string): Bill[] {
     }
 
     // Fatura recorrente: checar se alguma parcela restante cai no mês
-    const remaining = bill.recurrence.totalInstallments - bill.recurrence.paidInstallments;
-    for (let i = 0; i < remaining; i++) {
+    // Iterar a partir da primeira parcela não paga (offset = paidInstallments)
+    for (let i = bill.recurrence.paidInstallments; i < bill.recurrence.totalInstallments; i++) {
       const futureDate = calculateNextDueDate(bill.dueDate, bill.recurrence.frequency, i);
       if (futureDate.startsWith(yearMonth)) {
         // Retorna o bill com a dueDate projetada para esse mês
@@ -176,8 +176,8 @@ export function filterBillsByMonth(bills: Bill[], yearMonth: string): Bill[] {
           dueDate: futureDate,
           recurrence: {
             ...bill.recurrence,
-            // Mostrar qual parcela é neste mês (paidInstallments + offset + 1)
-            paidInstallments: bill.recurrence.paidInstallments + i,
+            // Mostrar qual parcela é neste mês
+            paidInstallments: i,
           },
         });
         break;
