@@ -3,7 +3,6 @@ import { useBills, Bill, RecurrenceInput } from '@/hooks/useBills';
 import { BillCard } from '@/components/BillCard';
 import { BillModal } from '@/components/BillModal';
 import { Dashboard } from '@/components/Dashboard';
-import { AlertNotification } from '@/components/AlertNotification';
 import { NotificationPrompt } from '@/components/NotificationPrompt';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -106,9 +105,6 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       {/* Notification Permission Prompt */}
       <NotificationPrompt />
-
-      {/* Alert Notification */}
-      <AlertNotification bills={bills} />
 
       {/* Header */}
       <header className="border-b border-gray-200 bg-gradient-to-r from-[#3BA36C] to-[#2d8a56] shadow-sm">

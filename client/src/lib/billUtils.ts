@@ -165,18 +165,37 @@ export function filterBillsByMonth(bills: Bill[], yearMonth: string): Bill[] {
     }
 
     // Fatura recorrente: checar se alguma parcela restante cai no mês
-    // Iterar a partir da primeira parcela não paga (offset = paidInstallments)
-    for (let i = bill.recurrence.paidInstallments; i < bill.recurrence.totalInstallments; i++) {
+    // A primeira parcela não paga é a "atual" — se estiver vencida, só mostrar
+    // no mês dela (como vencida) e não projetar parcelas futuras.
+    const firstUnpaidOffset = bill.recurrence.paidInstallments;
+    const firstUnpaidDate = calculateNextDueDate(bill.dueDate, bill.recurrence.frequency, firstUnpaidOffset);
+    const today = new Date().toISOString().split('T')[0];
+    const isOverdue = firstUnpaidDate < today;
+
+    if (isOverdue) {
+      // Fatura vencida: só mostrar no mês do vencimento, não projetar
+      if (firstUnpaidDate.startsWith(yearMonth)) {
+        result.push({
+          ...bill,
+          dueDate: firstUnpaidDate,
+          recurrence: {
+            ...bill.recurrence,
+            paidInstallments: firstUnpaidOffset,
+          },
+        });
+      }
+      continue;
+    }
+
+    // Fatura em dia: projetar parcelas nos meses correspondentes
+    for (let i = firstUnpaidOffset; i < bill.recurrence.totalInstallments; i++) {
       const futureDate = calculateNextDueDate(bill.dueDate, bill.recurrence.frequency, i);
       if (futureDate.startsWith(yearMonth)) {
-        // Retorna o bill com a dueDate projetada para esse mês
-        // e o número da parcela correspondente
         result.push({
           ...bill,
           dueDate: futureDate,
           recurrence: {
             ...bill.recurrence,
-            // Mostrar qual parcela é neste mês
             paidInstallments: i,
           },
         });
@@ -193,17 +212,8 @@ export function filterBillsByMonth(bills: Bill[], yearMonth: string): Bill[] {
 }
 
 export function calculateSummary(bills: Bill[]) {
-  const total = bills.reduce((sum, bill) => sum + bill.amount, 0);
-
   const paid = bills
     .filter((bill) => bill.paid)
-    .reduce((sum, bill) => sum + bill.amount, 0);
-
-  const overdue = bills
-    .filter((bill) => {
-      const status = calculateBillStatus(bill);
-      return status.isOverdue;
-    })
     .reduce((sum, bill) => sum + bill.amount, 0);
 
   // Pendente = não paga E não vencida (dentro do prazo)
@@ -215,5 +225,8 @@ export function calculateSummary(bills: Bill[]) {
     })
     .reduce((sum, bill) => sum + bill.amount, 0);
 
-  return { total, pending, paid, overdue };
+  // Total do mês = Pendente + Pago (exclui vencidas, que aparecem separadas)
+  const total = pending + paid;
+
+  return { total, pending, paid };
 }
