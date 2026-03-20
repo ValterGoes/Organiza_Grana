@@ -21,7 +21,7 @@ const billSchema = z.object({
   paid: z.boolean(),
   isRecurring: z.boolean().default(false),
   recurrenceFrequency: z.enum(['monthly', 'weekly', 'biweekly']).default('monthly'),
-  recurrenceInstallments: z.number().int().min(2, 'Mínimo 2 parcelas').max(60, 'Máximo 60 parcelas').default(12),
+  recurrenceInstallments: z.number().int().min(2, 'Mínimo 2 parcelas').max(120, 'Máximo 120 parcelas').default(12),
 });
 
 type BillFormData = z.infer<typeof billSchema>;
@@ -102,6 +102,15 @@ export function BillModal({ isOpen, onClose, onSave, initialBill }: BillModalPro
       alertDays: data.alertDays,
       notes: data.notes || undefined,
       paid: data.paid,
+      // Ao editar recorrente, preservar recurrence com totalInstallments atualizado
+      ...(isEditingRecurring && initialBill?.recurrence
+        ? {
+            recurrence: {
+              ...initialBill.recurrence,
+              totalInstallments: data.recurrenceInstallments,
+            },
+          }
+        : {}),
     };
 
     const recurrence: RecurrenceInput | undefined =
@@ -253,16 +262,38 @@ export function BillModal({ isOpen, onClose, onSave, initialBill }: BillModalPro
             </div>
           )}
 
-          {/* Indicador de recorrência ao editar */}
+          {/* Edição de recorrência ao editar fatura recorrente */}
           {isEditingRecurring && initialBill?.recurrence && (
-            <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
-              {initialBill.recurrence.paidInstallments}/{initialBill.recurrence.totalInstallments} parcelas pagas
-              {' · '}
-              {initialBill.recurrence.totalInstallments - initialBill.recurrence.paidInstallments} restantes
-              {' · '}
-              {initialBill.recurrence.frequency === 'monthly' && 'Mensal'}
-              {initialBill.recurrence.frequency === 'weekly' && 'Semanal'}
-              {initialBill.recurrence.frequency === 'biweekly' && 'Quinzenal'}
+            <div className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
+              <div className="flex items-center justify-between text-sm text-blue-700">
+                <span className="font-medium">
+                  🔄 {initialBill.recurrence.frequency === 'monthly' ? 'Mensal' : initialBill.recurrence.frequency === 'weekly' ? 'Semanal' : 'Quinzenal'}
+                </span>
+                <span>
+                  {initialBill.recurrence.paidInstallments} de {watch('recurrenceInstallments')} pagas
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="recurrenceInstallments" className="text-xs text-blue-700">Total de Parcelas</Label>
+                  <Input
+                    id="recurrenceInstallments"
+                    type="number"
+                    min={Math.max(2, initialBill.recurrence.paidInstallments + 1)}
+                    max={120}
+                    className="border-blue-300 bg-white"
+                    {...register('recurrenceInstallments', { valueAsNumber: true })}
+                  />
+                  {errors.recurrenceInstallments && (
+                    <p className="mt-1 text-xs text-red-600">{errors.recurrenceInstallments.message}</p>
+                  )}
+                </div>
+                <div className="flex flex-col justify-end">
+                  <p className="text-xs text-blue-600">
+                    {Math.max(0, watch('recurrenceInstallments') - initialBill.recurrence.paidInstallments)} restantes
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
