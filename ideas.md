@@ -1,4 +1,4 @@
-# Ideias de Design - Gerenciador de Vencimentos
+# Ideias de Design - Organiza Grana
 
 ## Resposta 1: Minimalismo Funcional com Urgência Visual (Probabilidade: 0.08)
 

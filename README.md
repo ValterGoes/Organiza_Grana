@@ -52,8 +52,8 @@ Aplicação web PWA para controle de contas e gastos pessoais com foco em segura
 
 ```bash
 # Clonar o repositório
-git clone https://github.com/ValterGoes/Gerenciador_de_Vencimentos.git
-cd Gerenciador_de_Vencimentos
+git clone https://github.com/ValterGoes/Organiza_Grana.git
+cd Organiza_Grana
 
 # Instalar dependências
 pnpm install
