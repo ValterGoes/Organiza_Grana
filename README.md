@@ -25,6 +25,8 @@ Aplicação web PWA para controle de contas e gastos pessoais com foco em segura
 - **Navegação por Abas** — Bottom navigation para alternar entre Vencimentos e Gastos Diários
 - **Proteção por PIN** — Tela de bloqueio com PIN numérico, logo e auto-lock ao sair do app
 - **Criptografia** — Dados financeiros criptografados com AES-256-GCM via Web Crypto API (PBKDF2 para derivação de chave)
+- **Backup e Restauração** — Backup automático a cada 7 dias (download JSON) e restauração manual na tela de setup do PIN
+- **Armazenamento Persistente** — Solicita ao navegador que preserve os dados do app contra limpeza automática
 - **PWA** — Instalável no dispositivo, funciona offline com Service Worker
 - **Tema Claro/Escuro** — Suporte a dark mode com cores da marca adaptadas
 - **Responsivo** — Interface adaptada para desktop e mobile
@@ -86,7 +88,7 @@ client/
 │   ├── components/       # Componentes React (BillCard, BillModal, Dashboard, PinScreen...)
 │   ├── contexts/         # AuthContext (PIN), ThemeContext
 │   ├── hooks/            # useBills, useExpenses (CRUD + persistência criptografada)
-│   ├── lib/              # Utilitários (crypto, secureStorage, notifications, billUtils)
+│   ├── lib/              # Utilitários (crypto, secureStorage, notifications, billUtils, backup)
 │   └── pages/            # Home, Expenses, NotFound
 server/
 └── index.ts              # Express - serve arquivos estáticos

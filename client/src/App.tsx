@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { autoBackupIfNeeded } from "@/lib/backup";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -45,6 +47,15 @@ function AppContent() {
 }
 
 function App() {
+  useEffect(() => {
+    // Solicitar armazenamento persistente para evitar perda de dados
+    if (navigator.storage?.persist) {
+      navigator.storage.persist();
+    }
+    // Backup automático a cada 7 dias
+    autoBackupIfNeeded();
+  }, []);
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">

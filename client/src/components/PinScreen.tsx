@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Lock, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { Lock, ShieldCheck, AlertTriangle, Upload } from 'lucide-react';
+import { importBackup } from '@/lib/backup';
 
 const PIN_LENGTH = 6;
 const MAX_ATTEMPTS = 5;
@@ -19,8 +20,21 @@ export function PinScreen() {
   const [attempts, setAttempts] = useState(0);
   const [cooldown, setCooldown] = useState(0);
   const [showReset, setShowReset] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isSetup = state === 'setup';
+
+  const handleRestore = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const ok = await importBackup(file);
+    if (ok) {
+      window.location.reload();
+    } else {
+      setError('Arquivo de backup inválido.');
+    }
+    e.target.value = '';
+  };
 
   const startCooldown = useCallback(() => {
     setCooldown(COOLDOWN_SECONDS);
@@ -158,6 +172,25 @@ export function PinScreen() {
             <p className="text-sm text-gray-500">
               Tente novamente em <span className="font-semibold">{cooldown}s</span>
             </p>
+          )}
+
+          {isSetup && step === 'enter' && (
+            <div className="mt-2 text-center">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleRestore}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 underline"
+              >
+                <Upload className="h-3 w-3" />
+                Restaurar backup
+              </button>
+            </div>
           )}
 
           {!isSetup && (

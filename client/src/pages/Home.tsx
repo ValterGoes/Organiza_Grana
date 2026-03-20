@@ -31,7 +31,6 @@ export default function Home() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
   });
-
   // Checar notificações de vencimento ao abrir o app
   useEffect(() => {
     if (bills.length > 0) {
