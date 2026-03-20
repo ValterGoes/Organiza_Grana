@@ -173,7 +173,7 @@ export function filterBillsByMonth(bills: Bill[], yearMonth: string): Bill[] {
     const isOverdue = firstUnpaidDate < today;
 
     if (isOverdue) {
-      // Fatura vencida: só mostrar no mês do vencimento, não projetar
+      // Fatura vencida: mostrar no mês do vencimento
       if (firstUnpaidDate.startsWith(yearMonth)) {
         result.push({
           ...bill,
@@ -183,6 +183,24 @@ export function filterBillsByMonth(bills: Bill[], yearMonth: string): Bill[] {
             paidInstallments: firstUnpaidOffset,
           },
         });
+      }
+      // Continuar projetando parcelas futuras (a partir da próxima)
+      for (let i = firstUnpaidOffset + 1; i < bill.recurrence.totalInstallments; i++) {
+        const futureDate = calculateNextDueDate(bill.dueDate, bill.recurrence.frequency, i);
+        if (futureDate.startsWith(yearMonth)) {
+          result.push({
+            ...bill,
+            dueDate: futureDate,
+            recurrence: {
+              ...bill.recurrence,
+              paidInstallments: i,
+            },
+          });
+          break;
+        }
+        if (futureDate > yearMonth + '-31') {
+          break;
+        }
       }
       continue;
     }
@@ -225,8 +243,8 @@ export function calculateSummary(bills: Bill[]) {
     })
     .reduce((sum, bill) => sum + bill.amount, 0);
 
-  // Total do mês = Pendente + Pago (exclui vencidas, que aparecem separadas)
-  const total = pending + paid;
+  // Total do mês = todas as faturas do mês (incluindo vencidas deste mês)
+  const total = bills.reduce((sum, bill) => sum + bill.amount, 0);
 
   return { total, pending, paid };
 }
